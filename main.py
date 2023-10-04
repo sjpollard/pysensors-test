@@ -2,7 +2,6 @@ import matplotlib.pyplot as plt
 import numpy as np
 from sklearn import datasets
 from sklearn.model_selection import train_test_split
-from sklearn.preprocessing import StandardScaler
 
 import pysensors as ps
 from pysensors.classification import SSPOC
@@ -18,27 +17,27 @@ def main():
     X = faces['data']
     y = faces['target']
 
-    #ts.show(faces['images'][0])
+    ts.show(faces['images'][0])
 
     X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.25, random_state=random_state)
 
     model = SSPOC(l1_penalty=0.01)
     model.fit(X_train, y_train)
     print(model.get_selected_sensors())
-    plot_sensor_locations(model.selected_sensors)
+    plot_sensor_locations(model.selected_sensors, faces['images'][0].shape)
 
 # Plot sensor locations
-def plot_sensor_locations(sensors, ax=None):
-    img = np.zeros(4096)
-    img[sensors] = 16
+def plot_sensor_locations(sensors, shape, ax=None):
+    img = np.zeros(shape[0] * shape[1])
+    img[sensors] = 1
 
     if ax is None:
-        plt.imshow(img.reshape(64, 64), cmap=plt.cm.binary)
+        plt.imshow(img.reshape(shape[0], shape[1]), cmap=plt.cm.binary)
         plt.xticks([])
         plt.yticks([])
         plt.title('Learned sensor locations')
     else:
-        ax.imshow(img.reshape(64, 64), cmap=plt.cm.binary)
+        ax.imshow(img.reshape(shape[0], shape[1]), cmap=plt.cm.binary)
         ax.set(xticks=[], yticks=[], title='Learned sensor locations')
 
     plt.show()
