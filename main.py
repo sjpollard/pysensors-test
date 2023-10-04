@@ -21,10 +21,19 @@ def main():
 
     X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.25, random_state=random_state)
 
-    model = SSPOC(l1_penalty=0.01)
+    model = SSPOC(l1_penalty=0.005)
     model.fit(X_train, y_train)
-    print(model.get_selected_sensors())
-    plot_sensor_locations(model.selected_sensors, faces['images'][0].shape)
+    print(len(model.get_selected_sensors()))
+
+    new_face = np.zeros(faces['images'][0].ravel().shape)
+    print(new_face.shape)
+    np.put(new_face, model.get_selected_sensors(), faces['data'][0][model.get_selected_sensors()])
+    new_face = np.reshape(new_face, faces['images'][0].shape)
+    print(new_face.shape)
+    ts.show(new_face)
+
+    #print(model.basis)
+    #plot_sensor_locations(model.selected_sensors, faces['images'][0].shape)
 
 # Plot sensor locations
 def plot_sensor_locations(sensors, shape, ax=None):
