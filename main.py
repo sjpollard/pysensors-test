@@ -2,6 +2,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 from sklearn import datasets
 from sklearn.model_selection import train_test_split
+from sklearn.metrics import accuracy_score
 
 import pysensors as ps
 from pysensors.classification import SSPOC
@@ -11,7 +12,9 @@ import torchshow as ts
 def main():
     # Set seed for reproducibility
     random_state = 0
-    
+
+    display = False
+
     # Load the data
     faces = datasets.fetch_olivetti_faces()
     X = faces['data']
@@ -19,7 +22,6 @@ def main():
 
     height, width = faces['images'][0].shape
 
-    ts.show(faces['images'][0])
 
     X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.25, random_state=random_state)
 
@@ -34,16 +36,26 @@ def main():
     model.fit(X_train, y_train)
     print(f'Sensors selected: {len(model.get_selected_sensors())}')
     
-    plot_sensor_locations(model.selected_sensors, (height, width))
+    if display:
+        
+        ts.show(faces['images'][0])
 
-    new_face = np.zeros(height * width)
-    np.put(new_face, model.get_selected_sensors(), faces['data'][0][model.get_selected_sensors()])
-    new_face = np.reshape(new_face, (height, width))
-    ts.show(new_face)
+        plot_sensor_locations(model.selected_sensors, (height, width))
 
-    ts.show(model.basis.matrix_representation())
+        new_face = np.zeros(height * width)
+        np.put(new_face, model.get_selected_sensors(), faces['data'][0][model.get_selected_sensors()])
+        new_face = np.reshape(new_face, (height, width))
+        ts.show(new_face)
 
-    ts.show(np.reshape(model.basis.matrix_representation().T, (n_basis_modes, height, width)))
+        ts.show(model.basis.matrix_representation())
+
+        ts.show(np.reshape(model.basis.matrix_representation().T, (n_basis_modes, height, width)))
+
+    y_pred = model.predict(X_train[:,model.selected_sensors])
+    print(f'Train accuracy: {accuracy_score(y_train, y_pred) * 100}%')
+
+    y_pred = model.predict(X_test[:,model.selected_sensors])
+    print(f'Test accuracy: {accuracy_score(y_test, y_pred) * 100}%')
 
 
 # Plot sensor locations
