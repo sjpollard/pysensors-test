@@ -22,11 +22,10 @@ def main():
 
     height, width = faces['images'][0].shape
 
-
     X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.25, random_state=random_state)
 
     n_basis_modes = 100
-    l1_penalty = 0.1
+    l1_penalty = 0.2
 
     #basis = ps.basis.Identity(n_basis_modes=n_basis_modes)
     basis = ps.basis.SVD(n_basis_modes=n_basis_modes)
