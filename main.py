@@ -17,24 +17,34 @@ def main():
     X = faces['data']
     y = faces['target']
 
+    height, width = faces['images'][0].shape
+
     ts.show(faces['images'][0])
 
     X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.25, random_state=random_state)
 
-    model = SSPOC(basis=ps.basis.Identity(n_basis_modes=10), l1_penalty=0.005, n_sensors=500)
+    n_basis_modes = 100
+    l1_penalty = 0.1
+
+    #basis = ps.basis.Identity(n_basis_modes=n_basis_modes)
+    basis = ps.basis.SVD(n_basis_modes=n_basis_modes)
+    #basis = ps.basis.RandomProjection(n_basis_modes=n_basis_modes)
+
+    model = SSPOC(basis=basis, l1_penalty=l1_penalty)
     model.fit(X_train, y_train)
     print(f'Sensors selected: {len(model.get_selected_sensors())}')
+    
+    plot_sensor_locations(model.selected_sensors, (height, width))
 
-    new_face = np.zeros(faces['images'][0].ravel().shape)
+    new_face = np.zeros(height * width)
     np.put(new_face, model.get_selected_sensors(), faces['data'][0][model.get_selected_sensors()])
-    new_face = np.reshape(new_face, faces['images'][0].shape)
+    new_face = np.reshape(new_face, (height, width))
     ts.show(new_face)
 
     ts.show(model.basis.matrix_representation())
 
-    ts.show(np.reshape(model.basis.matrix_representation().T, (10, 64, 64)))
+    ts.show(np.reshape(model.basis.matrix_representation().T, (n_basis_modes, height, width)))
 
-    #plot_sensor_locations(model.selected_sensors, faces['images'][0].shape)
 
 # Plot sensor locations
 def plot_sensor_locations(sensors, shape, ax=None):
