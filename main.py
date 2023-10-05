@@ -1,13 +1,17 @@
 import matplotlib.pyplot as plt
 import numpy as np
+import pysensors as ps
+import torchshow as ts
+import pandas as pd
+
 from sklearn import datasets
 from sklearn.model_selection import train_test_split
 from sklearn.metrics import accuracy_score
-
-import pysensors as ps
 from pysensors.classification import SSPOC
+from PIL import Image
 
-import torchshow as ts
+
+
 
 def main():
     # Set seed for reproducibility
@@ -57,6 +61,12 @@ def main():
     print(f'Test accuracy: {accuracy_score(y_test, y_pred) * 100}%')
 
 
+def load_EPIC(path):
+    annotations = pd.read_csv('EPIC.csv')
+    annotations = annotations[annotations['video_id'] == 'P01_01']
+    print(annotations['noun_class'].value_counts())
+    #ts.show(Image.open(f'{path}/P01/rgb_frames/P01_01/frame_0000000001.jpg'))
+
 # Plot sensor locations
 def plot_sensor_locations(sensors, shape, ax=None):
     img = np.zeros(shape[0] * shape[1])
@@ -74,4 +84,4 @@ def plot_sensor_locations(sensors, shape, ax=None):
     plt.show()
 
 if __name__ == "__main__":
-    main()
+    load_EPIC('../../EPIC-KITCHENS')
