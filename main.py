@@ -9,11 +9,14 @@ from pysensors.classification import SSPOC
 
 import torchshow as ts
 
+from patchify import patchify, unpatchify
+
 def main():
     # Set seed for reproducibility
     random_state = 0
 
     display = False
+    patch = True
 
     # Load the data
     faces = datasets.fetch_olivetti_faces()
@@ -49,6 +52,33 @@ def main():
         ts.show(model.basis.matrix_representation())
 
         ts.show(np.reshape(model.basis.matrix_representation().T, (n_basis_modes, height, width)))
+
+    if patch:
+
+        patch_shape = (8, 8)
+
+        face = faces['images'][0]
+        ts.show(face)
+
+        patched_face = patchify(face, patch_shape, step=patch_shape[0])
+        torchshow_shape = (patched_face.shape[0] * patched_face.shape[1],) + patch_shape
+        print(torchshow_shape)
+
+        ts.show(patched_face.reshape(torchshow_shape), mode='grayscale')
+
+        sensors = np.zeros(height * width)
+        np.put(sensors, model.get_selected_sensors(), 1)
+        sensors = np.reshape(sensors, (height, width))
+
+        patched_sensors = patchify(sensors, patch_shape, step=patch_shape[0])
+        ts.show(patched_sensors.reshape(torchshow_shape), mode='grayscale')
+
+        mask_indices = np.argwhere(np.sum(patched_sensors, axis=(2,3)) == 0)
+
+        for index in mask_indices:
+            patched_face[index[0]][index[1]] = np.zeros(patch_shape)
+
+        ts.show(patched_face.reshape(torchshow_shape), mode='grayscale')
 
     y_pred = model.predict(X_train[:,model.selected_sensors])
     print(f'Train accuracy: {accuracy_score(y_train, y_pred) * 100}%')

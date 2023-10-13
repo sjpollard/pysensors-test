@@ -11,3 +11,4 @@ dependencies:
   - pip:
     - torchshow
     - python-sensors
+    - patchify
