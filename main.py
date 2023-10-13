@@ -54,31 +54,32 @@ def main():
         ts.show(np.reshape(model.basis.matrix_representation().T, (n_basis_modes, height, width)))
 
     if patch:
+        
+        path = 'images/'
 
         patch_shape = (8, 8)
 
         face = faces['images'][0]
-        ts.show(face)
+        ts.save(face, f'{path}/face.jpg', mode='grayscale')
 
         patched_face = patchify(face, patch_shape, step=patch_shape[0])
         torchshow_shape = (patched_face.shape[0] * patched_face.shape[1],) + patch_shape
-        print(torchshow_shape)
 
-        ts.show(patched_face.reshape(torchshow_shape), mode='grayscale')
+        ts.save(patched_face.reshape(torchshow_shape), f'{path}/patched_face.jpg', mode='grayscale')
 
         sensors = np.zeros(height * width)
         np.put(sensors, model.get_selected_sensors(), 1)
         sensors = np.reshape(sensors, (height, width))
 
         patched_sensors = patchify(sensors, patch_shape, step=patch_shape[0])
-        ts.show(patched_sensors.reshape(torchshow_shape), mode='grayscale')
+        ts.save(patched_sensors.reshape(torchshow_shape), f'{path}/patched_sensors.jpg', mode='grayscale')
 
         mask_indices = np.argwhere(np.sum(patched_sensors, axis=(2,3)) == 0)
 
         for index in mask_indices:
             patched_face[index[0]][index[1]] = np.zeros(patch_shape)
 
-        ts.show(patched_face.reshape(torchshow_shape), mode='grayscale')
+        ts.save(patched_face.reshape(torchshow_shape), f'{path}/masked_face.jpg', mode='grayscale')
 
     y_pred = model.predict(X_train[:,model.selected_sensors])
     print(f'Train accuracy: {accuracy_score(y_train, y_pred) * 100}%')
